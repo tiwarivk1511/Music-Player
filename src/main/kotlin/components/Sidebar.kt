@@ -79,9 +79,9 @@ fun Sidebar(onNavigate: (String) -> Unit) {
 
                 // Example items in the sidebar
                 SidebarItem(painterResource("drawable/ic_home.png"), text = "Home", onClick = { onNavigate("home") })
-                SidebarItem(painterResource("drawable/music_icon.png"), text = "Audio", onClick = { onNavigate("genre") })
-                SidebarItem(painterResource("drawable/ic_video_play.png"), text = "Video", onClick = { onNavigate("top_charted") })
-                SidebarItem(painterResource("drawable/microphone.png"), text = "Favorites", onClick = { onNavigate("podcasts") })
+                SidebarItem(painterResource("drawable/music_icon.png"), text = "Audio", onClick = { onNavigate("audio") })
+                SidebarItem(painterResource("drawable/ic_video_play.png"), text = "Video", onClick = { onNavigate("videos") })
+                SidebarItem(painterResource("drawable/microphone.png"), text = "Favorites", onClick = { onNavigate("favorites") })
             }
         }
     }

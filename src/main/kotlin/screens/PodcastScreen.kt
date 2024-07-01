@@ -14,7 +14,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun PodcastsScreen(onNavigate: () -> Unit) {
+fun FavoritesScreen(onNavigate: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()

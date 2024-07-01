@@ -8,10 +8,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import components.Sidebar
 import androidx.compose.runtime.Composable
-import screens.AlbumsScreen
-import screens.GenreScreen
-import screens.PodcastsScreen
-import screens.TopChartedScreen
+import screens.*
 
 
 @Composable
@@ -28,11 +25,10 @@ fun App() {
 
             //Show the current Screen here
             when (currentScreen) {
-                "home" -> HomeScreen { currentScreen = "genre" }
-                "genre" -> GenreScreen { currentScreen = "albums" }
-                "albums" -> AlbumsScreen { currentScreen = "top_charted" }
-                "top_charted" -> TopChartedScreen { currentScreen = "podcasts" }
-                "podcasts" -> PodcastsScreen { currentScreen = "home" }
+                "home" -> HomeScreen { currentScreen = "audio" }
+                "audio" -> AudioScreen { currentScreen = "video" }
+                "video" -> VideoScreen { currentScreen = "favorites" }
+                "favorites" -> FavoritesScreen { currentScreen = "home" }
             }
         }
 
