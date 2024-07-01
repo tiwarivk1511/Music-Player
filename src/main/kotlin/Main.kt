@@ -26,9 +26,10 @@ fun App() {
             //Show the current Screen here
             when (currentScreen) {
                 "home" -> HomeScreen { currentScreen = "audio" }
-                "audio" -> AudioScreen { currentScreen = "video" }
-                "video" -> VideoScreen { currentScreen = "favorites" }
+                "audio" -> AudioScreen { currentScreen = "videos" }
+                "videos" -> VideoScreen { currentScreen = "favorites" }
                 "favorites" -> FavoritesScreen { currentScreen = "home" }
+                "settings" -> SettingsScreen { currentScreen = "home" }
             }
         }
 

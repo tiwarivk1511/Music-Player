@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.sp
 import components.BottomControl
 import components.sub_components.AlbumListViewArea
 import components.sub_components.BannerHome
-import components.sub_components.ListViewArea
+import components.sub_components.SongListViewArea
 
 // Data class for Album
 data class Album(
@@ -68,7 +68,7 @@ fun HomeScreen(function: () -> Unit) {
                             .padding(4.dp),
                     )
 
-                    ListViewArea(
+                    SongListViewArea(
                         modifier = Modifier
                             .weight(1f) // Use weight to take 50% of available width
                             .fillMaxHeight()

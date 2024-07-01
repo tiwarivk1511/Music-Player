@@ -11,14 +11,14 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun VideoScreen(onNavigate: () -> Unit) {
+fun SettingsScreen(onNavigate: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
         Text(
-            text = "Videos",
+            text = "Settings",
             style = MaterialTheme.typography.h5,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
