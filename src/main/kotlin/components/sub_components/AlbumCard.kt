@@ -25,8 +25,7 @@ fun AlbumCards(
         modifier = modifier
             .fillMaxWidth()
             .padding(2.dp)
-            .height(150.dp)
-            .clickable(onClick = onCardClick),
+            .height(150.dp),
         shape = RoundedCornerShape(10.dp),
         backgroundColor = Color(0xFF676565),
         elevation = 4.dp
@@ -72,10 +71,12 @@ fun AlbumCards(
                 painter = painterResource("drawable/play_button.png"),
                 contentDescription = "Play Icon",
                 modifier = Modifier
-                    .size(30.dp)
-                    .padding(8.dp),
+                    .size(40.dp)
+                    .padding(8.dp)
+                    .clickable {onCardClick},
                 alpha = 0.5f
             )
+
         }
     }
 }

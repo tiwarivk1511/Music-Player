@@ -22,6 +22,9 @@ dependencies {
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
 
+    implementation("com.squareup.sqldelight:runtime-jvm:1.5.3")
+    implementation("com.squareup.sqldelight:sqlite-driver:1.5.3")
+
 }
 
 compose.desktop {

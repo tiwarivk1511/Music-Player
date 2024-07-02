@@ -26,7 +26,8 @@ fun SongListViewArea(modifier: Modifier) {
                         .fillMaxWidth()
                         .height(60.dp)
                         .padding(bottom = 2.dp),
-                    onCardClick = {}
+                    onCardClick = {},
+                    onFavoriteClick = {}
                 )
             }
         }

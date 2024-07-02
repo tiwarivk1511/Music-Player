@@ -20,14 +20,14 @@ fun ListCards(
     artistName: String,
     albumName: String,
     modifier: Modifier = Modifier,
-    onCardClick: () -> Unit
+    onCardClick: () -> Unit,
+    onFavoriteClick: () -> Unit
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(2.dp)
-            .height(150.dp)
-            .clickable(onClick = onCardClick),
+            .height(150.dp),
         shape = RoundedCornerShape(10.dp),
         backgroundColor = Color(0xFF676565),
         elevation = 4.dp
@@ -87,7 +87,19 @@ fun ListCards(
                 contentDescription = "Play Icon",
                 modifier = Modifier
                     .size(30.dp)
-                    .padding(8.dp),
+                    .padding(8.dp)
+                    .clickable(onClick = onCardClick),
+                alpha = 0.5f
+            )
+
+
+            Image(
+                painter = painterResource("drawable/ic_favorites.png"),
+                contentDescription = "More Icon",
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(8.dp)
+                    .clickable(onClick = onFavoriteClick),
                 alpha = 0.5f
             )
         }
