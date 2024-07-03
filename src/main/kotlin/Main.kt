@@ -10,6 +10,10 @@ import components.Sidebar
 import androidx.compose.runtime.Composable
 import screens.*
 
+object Settings {
+    var audioFolders = emptyList<String>()
+    var videoFolders = emptyList<String>()
+}
 
 @Composable
 @Preview
@@ -26,10 +30,20 @@ fun App() {
             //Show the current Screen here
             when (currentScreen) {
                 "home" -> HomeScreen { currentScreen = "audio" }
-                "audio" -> AudioScreen { currentScreen = "videos" }
-                "videos" -> VideoScreen { currentScreen = "favorites" }
+                "audio" -> {
+                    AudioScreen(
+                        { currentScreen = "videos" } ,Settings.audioFolders
+                    )
+                }
+                "videos" -> VideoScreen({ currentScreen = "favorites" }, Settings.videoFolders
+                )
                 "favorites" -> FavoritesScreen { currentScreen = "home" }
-                "settings" -> SettingsScreen { currentScreen = "home" }
+                "settings" -> SettingsScreen( { currentScreen = "home"},onAudioFoldersSelected = { folders ->
+                Settings.audioFolders = folders
+            },
+            onVideoFoldersSelected = { folders ->
+                Settings.videoFolders = folders
+            })
             }
         }
 
@@ -47,3 +61,4 @@ fun main() = application {
         App()
     }
 }
+

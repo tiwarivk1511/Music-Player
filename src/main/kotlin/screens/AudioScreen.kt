@@ -5,19 +5,27 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import components.BottomControl
 import components.sub_components.ListCards
+import java.io.File
 
 @Composable
-fun AudioScreen(onNavigate: () -> Unit) {
+fun AudioScreen(
+    onNavigate: () -> Unit,
+    folderPaths: List<String>
+) {
     val verticalScrollState = rememberScrollState()
+    val audioFiles = remember { scanAudioFiles(folderPaths) }
+
+    // MediaPlayer state
+    val mediaPlayer = remember { MediaPlayerController() }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.DarkGray)) {
-
         // Fixed header
         Column(
             modifier = Modifier
@@ -32,7 +40,6 @@ fun AudioScreen(onNavigate: () -> Unit) {
                 modifier = Modifier.padding(vertical = 8.dp)
             )
 
-
             // Scrollable content area
             Column(
                 modifier = Modifier
@@ -41,36 +48,35 @@ fun AudioScreen(onNavigate: () -> Unit) {
                     .padding(horizontal = 16.dp)
                     .background(Color.DarkGray)
             ) {
-                // Sample list of audio items
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    repeat(10) { index ->
-                        ListCards(
-                            "Numb",
-                            "Linkin Park",
-                            "Numb",
-                            Modifier.fillMaxWidth().height(65.dp),
-                            onCardClick = {},
-                            onFavoriteClick = {})
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
+                // Display audio files
+                audioFiles.forEach { file ->
+                    ListCards(
+                        file.nameWithoutExtension,
+                        file.parentFile?.name ?: "Unknown Artist",
+                        file.absolutePath,
+                        Modifier.fillMaxWidth().height(65.dp),
+                        onCardClick = { /* Handle card click */ },
+                        onFavoriteClick = { /* Handle favorite click */ }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
 
         // Fixed bottom control bar
         BottomControl(
-            songName = "Numb",
-            artistName = "Linkin Park",
-            isPlaying = true,
-            onPlayPauseToggle = {},
-            onNext = {},
-            onPrevious = {},
-            onVolumeUp = {},
-            onVolumeDown = {},
-            onShuffleToggle = {},
-            currentPosition = 0.0f,
-            totalDuration = 100.0f,
-            onSeek = {},
+            songName = mediaPlayer.currentSongName,
+            artistName = mediaPlayer.currentArtistName,
+            isPlaying = mediaPlayer.isPlaying(),
+            onPlayPauseToggle = { mediaPlayer.togglePlayPause() },
+            onNext = { mediaPlayer.playNext() },
+            onPrevious = { mediaPlayer.playPrevious() },
+            onVolumeUp = { mediaPlayer.adjustVolume(true) },
+            onVolumeDown = { mediaPlayer.adjustVolume(false) },
+            onShuffleToggle = { mediaPlayer.toggleShuffle() },
+            currentPosition = mediaPlayer.getCurrentPosition(),
+            totalDuration = mediaPlayer.getTotalDuration(),
+            onSeek = { position -> mediaPlayer.seekTo(position) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(82.dp)
@@ -78,7 +84,7 @@ fun AudioScreen(onNavigate: () -> Unit) {
                 .align(Alignment.BottomCenter)
         )
 
-        //vertical scrollbar
+        // Vertical scrollbar (optional)
         VerticalScrollbar(
             modifier = Modifier
                 .fillMaxHeight()
@@ -87,4 +93,22 @@ fun AudioScreen(onNavigate: () -> Unit) {
             adapter = rememberScrollbarAdapter(verticalScrollState)
         )
     }
+}
+
+// Function to scan specified folder paths for audio files
+fun scanAudioFiles(folderPaths: List<String>): List<File> {
+    val audioFiles = mutableListOf<File>()
+
+    folderPaths.forEach { path ->
+        val folder = File(path)
+        if (folder.exists() && folder.isDirectory) {
+            folder.walkTopDown().forEach { file ->
+                if (file.isFile && file.extension in listOf("mp3", "wav")) {
+                    audioFiles.add(file)
+                }
+            }
+        }
+    }
+
+    return audioFiles
 }
