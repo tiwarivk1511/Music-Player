@@ -1,6 +1,6 @@
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.painterResource
@@ -8,11 +8,18 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import components.Sidebar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import components.BottomControl
 import screens.*
 
 object Settings {
-    var audioFolders = emptyList<String>()
-    var videoFolders = emptyList<String>()
+    val favoriteVideos: MutableList<String> = mutableListOf()
+    val favoriteAudio: MutableList<String> = mutableListOf()
+    var audioFolders = loadAudioFolderPaths()
+    var videoFolders = loadVideoFolderPaths()
 }
 
 @Composable
@@ -20,36 +27,69 @@ object Settings {
 fun App() {
 
     var currentScreen by remember { mutableStateOf("home") }
+    val verticalScrollState = rememberScrollState()
 
     MaterialTheme {
-        Row {
-            Column {
-                Sidebar(onNavigate = { screen -> currentScreen = screen })
-            }
-
-            //Show the current Screen here
-            when (currentScreen) {
-                "home" -> HomeScreen { currentScreen = "audio" }
-                "audio" -> {
-                    AudioScreen(
-                        { currentScreen = "videos" } ,Settings.audioFolders
-                    )
+        Box(modifier = Modifier
+            .background(Color.DarkGray)
+        ) {
+            Row {
+                Column {
+                    Sidebar(onNavigate = { screen -> currentScreen = screen })
                 }
-                "videos" -> VideoScreen({ currentScreen = "favorites" }, Settings.videoFolders
-                )
-                "favorites" -> FavoritesScreen { currentScreen = "home" }
-                "settings" -> SettingsScreen( { currentScreen = "home"},onAudioFoldersSelected = { folders ->
-                Settings.audioFolders = folders
-            },
-            onVideoFoldersSelected = { folders ->
-                Settings.videoFolders = folders
-            })
+                Column(modifier = Modifier.verticalScroll(verticalScrollState)) {  }
+                //Show the current Screen here
+                when (currentScreen) {
+                    "home" -> HomeScreen ({ currentScreen = "audio" }, Settings.audioFolders, videoFolderPaths = Settings.videoFolders, mediaPlayerController = MediaPlayerController())
+                    "audio" -> {
+                        AudioScreen(
+                            { currentScreen = "videos" } ,Settings.audioFolders
+                        )
+                    }
+                    "videos" -> VideoScreen({ currentScreen = "favorites" }, Settings.videoFolders
+                    )
+                    "favorites" -> FavoritesScreen { currentScreen = "home" }
+                    "settings" -> SettingsScreen( { currentScreen = "home"},onAudioFoldersSelected = { folders ->
+                        Settings.audioFolders = folders
+                    },
+                        onVideoFoldersSelected = { folders ->
+                            Settings.videoFolders = folders
+                        })
+                }
             }
+            // Bottom bar for music control (static)
+            BottomControl(
+                songName = "Numb",
+                artistName = "Linkin Park",
+                isPlaying = true,
+                onPlayPauseToggle = {},
+                onNext = {},
+                onPrevious = {},
+                onVolumeUp = {},
+                onVolumeDown = {},
+                onShuffleToggle = {},
+                currentPosition = 0,
+                totalDuration = 100,
+                onSeek = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(82.dp)
+                    .background(color = Color(0xFF1E1E1E))
+                    .align(Alignment.BottomCenter)
+            )
+
+            VerticalScrollbar(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .fillMaxHeight(),
+                adapter = rememberScrollbarAdapter(verticalScrollState)
+            )
+
         }
+
 
     }
 }
-
 
 
 

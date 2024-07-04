@@ -17,8 +17,6 @@ import androidx.compose.ui.text.style.TextOverflow
 @Composable
 fun ListCards(
     soundName: String,
-    artistName: String,
-    albumName: String,
     modifier: Modifier = Modifier,
     onCardClick: () -> Unit,
     onFavoriteClick: () -> Unit
@@ -63,25 +61,9 @@ fun ListCards(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                Row {
-                    Text(
-                        text = artistName,
-                        color = Color.Gray,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Text(
-                        text = albumName,
-                        color = Color.Gray,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
             }
 
+            // Play Icon
             Image(
                 painter = painterResource("drawable/play_button.png"),
                 contentDescription = "Play Icon",
@@ -93,6 +75,7 @@ fun ListCards(
             )
 
 
+            // Favorite Icon
             Image(
                 painter = painterResource("drawable/ic_favorites.png"),
                 contentDescription = "More Icon",

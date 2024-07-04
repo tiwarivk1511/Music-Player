@@ -22,8 +22,8 @@ fun BottomControl(
     onVolumeUp: () -> Unit, // Callback for volume up action
     onVolumeDown: () -> Unit, // Callback for volume down action
     onShuffleToggle: () -> Unit, // Callback for shuffle toggle action
-    currentPosition: Float, // Current position of the song in seconds
-    totalDuration: Float, // Total duration of the song in seconds
+    currentPosition: Int, // Current position of the song in seconds
+    totalDuration: Int, // Total duration of the song in seconds
     onSeek: (Float) -> Unit, // Callback for seek action
     modifier: Modifier = Modifier
 
@@ -103,7 +103,7 @@ fun BottomControl(
                             currentPosition = it
                             onSeek(it) // Callback to notify about the seek position
                         },
-                        valueRange = 0f..totalDuration,
+                        valueRange = 0f..totalDuration.toFloat(),
                         modifier = Modifier.fillMaxWidth(),
                         enabled = true,
                         colors = SliderDefaults.colors(

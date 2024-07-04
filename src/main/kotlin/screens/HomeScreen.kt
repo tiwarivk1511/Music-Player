@@ -9,94 +9,81 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import components.BottomControl
-import components.sub_components.AlbumListViewArea
 import components.sub_components.BannerHome
 import components.sub_components.SongListViewArea
-
-// Data class for Album
-data class Album(
-    val resourcePath: String, // Path to the album resource
-    val albumName: String, // Name of the album
-    val artistName: String // Name of the artist
-)
+import components.sub_components.VideoListViewArea
+import screens.MediaPlayerController
+import screens.retrieveVideoFilesFromFolders
+import screens.scanMediaFiles
+import java.io.File
 
 @Composable
-fun HomeScreen(function: () -> Unit) {
+fun HomeScreen(
+    function: () -> Unit,
+    folderPaths: List<String>,
+    videoFolderPaths: List<String>,
+    mediaPlayerController: MediaPlayerController,
+
+) {
     val verticalScrollState = rememberScrollState()
-    val albums = remember { mutableStateListOf<Album>() }
-    val musicFolderPath = "C:/Users/BrancoSoft/Music"
+    val videoFiles = remember { retrieveVideoFilesFromFolders(videoFolderPaths) }
+    val audioFiles = remember { scanMediaFiles(folderPaths) }
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().background(Color.DarkGray)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(Color.DarkGray)
+                .verticalScroll(verticalScrollState)
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(verticalScrollState)
-            ) {
-                // Show the banner
-                BannerHome(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp),
-                    title = "What's New?",
-                    message = "Hello, Let's Enjoy the Rock!!"
-                )
-
-                Row(modifier = Modifier.fillMaxWidth()
-                    .background(color = Color.DarkGray),
-                    horizontalArrangement = Arrangement.SpaceEvenly ) {
-                    Text(text = "Latest Albums", fontSize = 20.sp, color = Color.White)
-                    Text(text = "Latest Songs", fontSize = 20.sp, color = Color.White)
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-                    horizontalArrangement = Arrangement.SpaceBetween // Adjust horizontalArrangement
-                ) {
-                    // Show the list view
-                    AlbumListViewArea(
-                        modifier = Modifier
-                            .weight(1f) // Use weight to take 50% of available width
-                            .fillMaxHeight()
-                            .background(Color.DarkGray)
-                            .padding(4.dp),
-                    )
-
-                    SongListViewArea(
-                        modifier = Modifier
-                            .weight(1f) // Use weight to take 50% of available width
-                            .fillMaxHeight()
-                            .background(Color.DarkGray)
-                            .padding(4.dp),
-                    )
-                }
-            }
-
-            // Bottom bar for music control (static)
-            BottomControl(
-                songName = "Numb",
-                artistName = "Linkin Park",
-                isPlaying = true,
-                onPlayPauseToggle = {},
-                onNext = {},
-                onPrevious = {},
-                onVolumeUp = {},
-                onVolumeDown = {},
-                onShuffleToggle = {},
-                currentPosition = 0.0f,
-                totalDuration = 100.0f,
-                onSeek = {},
+            // Show the banner
+            BannerHome(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(82.dp)
-                    .background(color = Color(0xFF1E1E1E))
+                    .height(250.dp),
+                title = "What's New?",
+                message = "Hello, Let's Enjoy the Rock!!"
             )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = Color.DarkGray),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Text(text = "Videos", fontSize = 20.sp, color = Color.White)
+                Text(text = "Audio", fontSize = 20.sp, color = Color.White)
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.DarkGray)
+                    .padding(4.dp)
+            ) {
+                // Show the list view
+                VideoListViewArea(
+                    videoFolderPaths = videoFolderPaths,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .background(Color.DarkGray)
+                        .padding(4.dp),
+                )
+
+                SongListViewArea(
+                    audioFolderPaths = folderPaths,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .background(Color.DarkGray)
+                        .padding(4.dp),
+                    mediaPlayerController = mediaPlayerController,
+
+                )
+            }
         }
 
         // Vertical scrollbar

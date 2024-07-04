@@ -1,3 +1,5 @@
+package screens
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,13 +22,16 @@ import javax.sound.sampled.FloatControl
 import javax.swing.JFileChooser
 
 @Composable
-fun SettingsScreen(onNavigate: () -> Unit, onAudioFoldersSelected: (List<String>) -> Unit,
-                   onVideoFoldersSelected: (List<String>) -> Unit) {
+fun SettingsScreen(
+    onNavigate: () -> Unit,
+    onAudioFoldersSelected: (List<String>) -> Unit,
+    onVideoFoldersSelected: (List<String>) -> Unit
+) {
     val audioFolders = remember { mutableStateListOf<String>() }
     val videoFolders = remember { mutableStateListOf<String>() }
     val verticalScrollState = rememberScrollState()
     var systemVolume by remember { mutableStateOf(getSystemVolume().toFloat()) }
-
+    var selectedAudioQuality by remember { mutableStateOf("Low") }
 
     // Launch a coroutine to observe system volume changes
     LaunchedEffect(Unit) {
@@ -49,7 +54,6 @@ fun SettingsScreen(onNavigate: () -> Unit, onAudioFoldersSelected: (List<String>
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .fillMaxWidth()
                 .verticalScroll(verticalScrollState)
                 .background(Color.DarkGray)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -59,18 +63,37 @@ fun SettingsScreen(onNavigate: () -> Unit, onAudioFoldersSelected: (List<String>
                 color = Color.White,
                 fontWeight = FontWeight.SemiBold,
                 style = MaterialTheme.typography.h5,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            DropdownSettingItem(
+                option = SettingOption(
+                    title = "Audio Quality",
+                    description = "Select audio quality",
+                    type = SettingType.DROPDOWN,
+                    icon = painterResource("drawable/volume_up.png")
+                ),
+                selectedItem = selectedAudioQuality,
+                onItemSelected = { newQuality ->
+                    selectedAudioQuality = newQuality
+                    // Handle the selected quality as needed
+                },
+                items = listOf("Low", "Medium", "High")
+            )
 
-            // Dropdown menu to set the audio quality
-            DropdownSettingItem(SettingOption("Audio Quality", "Select audio quality", SettingType.DROPDOWN, painterResource("drawable/volume_up.png")))
-
-            // Slider to adjust the volume level
-            SliderSettingItem(SettingOption("Volume", "Adjust volume level", SettingType.SLIDER, painterResource("drawable/volume_up.png")), systemVolume) { newVolume ->
-                systemVolume = newVolume
-                setSystemVolume(newVolume.toInt())
-            }
+            SliderSettingItem(
+                option = SettingOption(
+                    title = "Volume",
+                    description = "Adjust volume level",
+                    type = SettingType.SLIDER,
+                    icon = painterResource("drawable/volume_up.png")
+                ),
+                volumeLevel = systemVolume,
+                onVolumeChange = { newVolume ->
+                    systemVolume = newVolume
+                    setSystemVolume(newVolume.toInt())
+                }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -102,22 +125,37 @@ enum class SettingType {
 }
 
 @Composable
-fun DropdownSettingItem(option: SettingOption) {
+fun DropdownSettingItem(
+    option: SettingOption,
+    selectedItem: String,
+    onItemSelected: (String) -> Unit,
+    items: List<String>
+) {
     var expanded by remember { mutableStateOf(false) }
-    val items = listOf("Low", "Medium", "High")
-    var selectedItem by remember { mutableStateOf(items[0]) }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(painter = option.icon, contentDescription = option.title, modifier = Modifier.padding(end = 8.dp).size(24.dp), tint = Color.White)
+            Icon(
+                painter = option.icon,
+                contentDescription = option.title,
+                modifier = Modifier.padding(end = 8.dp).size(24.dp),
+                tint = Color.White
+            )
             Column {
-                Text(text = option.title, style = MaterialTheme.typography.body1, color = Color.White)
-                Text(text = option.description, style = MaterialTheme.typography.body2, color = Color.White)
+                Text(
+                    text = option.title,
+                    style = MaterialTheme.typography.body1,
+                    color = Color.White
+                )
+                Text(
+                    text = option.description,
+                    style = MaterialTheme.typography.body2,
+                    color = Color.White
+                )
             }
         }
 
@@ -125,7 +163,10 @@ fun DropdownSettingItem(option: SettingOption) {
             modifier = Modifier.clickable { expanded = !expanded },
             contentAlignment = Alignment.Center
         ) {
-            Button(modifier = Modifier.width(200.dp), onClick = { expanded = true }) {
+            Button(
+                modifier = Modifier.width(200.dp),
+                onClick = { expanded = true }
+            ) {
                 Text(text = selectedItem)
             }
 
@@ -135,7 +176,7 @@ fun DropdownSettingItem(option: SettingOption) {
             ) {
                 items.forEach { item ->
                     DropdownMenuItem(onClick = {
-                        selectedItem = item
+                        onItemSelected(item)
                         expanded = false
                     }) {
                         Text(text = item)
@@ -149,9 +190,7 @@ fun DropdownSettingItem(option: SettingOption) {
 @Composable
 fun SliderSettingItem(option: SettingOption, volumeLevel: Float, onVolumeChange: (Float) -> Unit) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -159,14 +198,20 @@ fun SliderSettingItem(option: SettingOption, volumeLevel: Float, onVolumeChange:
             Icon(
                 painter = option.icon,
                 contentDescription = option.title,
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .size(24.dp),
+                modifier = Modifier.padding(end = 8.dp).size(24.dp),
                 tint = Color.White
             )
             Column {
-                Text(text = option.title, style = MaterialTheme.typography.body1, color = Color.White)
-                Text(text = option.description, style = MaterialTheme.typography.body2, color = Color.White)
+                Text(
+                    text = option.title,
+                    style = MaterialTheme.typography.body1,
+                    color = Color.White
+                )
+                Text(
+                    text = option.description,
+                    style = MaterialTheme.typography.body2,
+                    color = Color.White
+                )
             }
         }
 
@@ -180,7 +225,7 @@ fun SliderSettingItem(option: SettingOption, volumeLevel: Float, onVolumeChange:
             colors = SliderDefaults.colors(
                 thumbColor = Color.White,
                 activeTickColor = Color.White,
-                inactiveTickColor = Color.LightGray,
+                inactiveTickColor = Color.LightGray
             )
         )
     }
@@ -240,7 +285,7 @@ fun loadVideoFolderPaths(): List<String> {
     }
 }
 
-//folder selection
+// Folder selection functions
 @Composable
 fun AudioFolderSelectionSection(audioFolders: MutableList<String>, onAudioFoldersSelected: () -> Unit) {
     FolderSelectionSection(
@@ -282,12 +327,15 @@ fun VideoFolderSelectionSection(videoFolders: MutableList<String>, onVideoFolder
 }
 
 @Composable
-fun FolderSelectionSection(icon: Painter, title: String, folders: MutableList<String>,
-                           onFolderRemove: (Int) -> Unit, onFolderAdd: () -> Unit) {
+fun FolderSelectionSection(
+    icon: Painter,
+    title: String,
+    folders: MutableList<String>,
+    onFolderRemove: (Int) -> Unit,
+    onFolderAdd: () -> Unit
+) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -296,25 +344,21 @@ fun FolderSelectionSection(icon: Painter, title: String, folders: MutableList<St
             Icon(
                 painter = icon,
                 contentDescription = title,
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .size(16.dp),
+                modifier = Modifier.size(24.dp),
                 tint = Color.White
             )
             Text(
                 text = title,
-                color = Color.White,
                 style = MaterialTheme.typography.body2,
-                modifier = Modifier.padding(bottom = 4.dp)
+                color = Color.White,
+                modifier = Modifier.padding(start = 8.dp)
             )
         }
 
         folders.forEachIndexed { index, folder ->
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 2.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
             ) {
                 Icon(
                     painter = painterResource("drawable/ic_folder.png"),
@@ -325,6 +369,7 @@ fun FolderSelectionSection(icon: Painter, title: String, folders: MutableList<St
                 Text(
                     text = folder,
                     style = MaterialTheme.typography.caption,
+                    color = Color.White,
                     maxLines = 1,
                     modifier = Modifier.weight(1f)
                 )
@@ -341,10 +386,10 @@ fun FolderSelectionSection(icon: Painter, title: String, folders: MutableList<St
 
         if (folders.size < 5) {
             Button(
-                onClick = {
-                    onFolderAdd()
-                },
-                modifier = Modifier.width(200.dp).padding(vertical = 8.dp),
+                onClick = { onFolderAdd() },
+                modifier = Modifier
+                    .width(200.dp)
+                    .padding(vertical = 8.dp),
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray)
             ) {
                 Icon(

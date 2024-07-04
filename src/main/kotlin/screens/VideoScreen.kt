@@ -13,7 +13,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import components.BottomControl
-import components.sub_components.ListCards
+import components.sub_components.VideoCards
 import java.io.File
 
 @Composable
@@ -31,7 +31,9 @@ fun VideoScreen(onNavigate: () -> Unit, folderPaths: List<String>) {
                 .padding(horizontal = 16.dp, vertical = 10.dp)
                 .background(Color.DarkGray)
         ) {
-            Row {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Image(
                     painter = painterResource("drawable/ic_video_play.png"),
                     contentDescription = "Album Image",
@@ -42,7 +44,7 @@ fun VideoScreen(onNavigate: () -> Unit, folderPaths: List<String>) {
                     text = "Videos",
                     style = MaterialTheme.typography.h5,
                     color = Color.White,
-                    modifier = Modifier.padding(vertical = 8.dp).align(Alignment.CenterVertically)
+                    modifier = Modifier.padding(start = 8.dp, end = 16.dp)
                 )
             }
 
@@ -52,22 +54,23 @@ fun VideoScreen(onNavigate: () -> Unit, folderPaths: List<String>) {
                     .fillMaxWidth()
                     .verticalScroll(verticalScrollState)
                     .padding(horizontal = 16.dp)
-                    .background(Color.DarkGray)
             ) {
                 // Display video files
                 videoFiles.forEach { videoFile ->
-                    ListCards(
-                        videoFile.nameWithoutExtension,
-                        videoFile.parentFile?.name ?: "Unknown Artist",
-                        videoFile.name,
-                        Modifier.fillMaxWidth().height(65.dp),
+                    VideoCards(
+                        title = videoFile.nameWithoutExtension,
+                        subtitle = videoFile.parentFile?.name ?: "Unknown Artist",
+                        description = videoFile.name,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(65.dp),
                         onCardClick = {
-                            // Handle video playback
-                            // Example: navigate to a video playback screen
-                            // For simplicity, you can add a placeholder action here
+                            // Handle video playback navigation here
                         },
-                        onFavoriteClick = {
-                            // Handle favorite action if needed
+
+                        onAddFavoriteClick = {
+                            // Add video file to favorite list
+                           Settings.favoriteVideos.add(videoFile.absolutePath)
                         }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -75,10 +78,10 @@ fun VideoScreen(onNavigate: () -> Unit, folderPaths: List<String>) {
             }
         }
 
-        // Fixed bottom control bar (example implementation, adjust as per your actual player implementation)
+        // Fixed bottom control bar
         BottomControl(
-            songName = mediaPlayer.currentSongName,
-            artistName = mediaPlayer.currentArtistName,
+            songName = mediaPlayer.getCurrentSongName(),
+            artistName = mediaPlayer.getCurrentArtistName(),
             isPlaying = mediaPlayer.isPlaying(),
             onPlayPauseToggle = { mediaPlayer.togglePlayPause() },
             onNext = { mediaPlayer.playNext() },
@@ -114,7 +117,7 @@ fun retrieveVideoFilesFromFolders(folderPaths: List<String>): List<File> {
         val folder = File(folderPath)
         if (folder.exists() && folder.isDirectory) {
             val files = folder.listFiles { file ->
-                file.isFile && file.extension.toLowerCase() in listOf("mp4", "avi", "mkv", "mov") // Add more extensions as needed
+                file.isFile && file.extension.lowercase() in listOf("mp4", "avi", "mkv", "mov") // Add more extensions as needed
             }
             if (files != null) {
                 videoFiles.addAll(files)

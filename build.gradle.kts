@@ -25,6 +25,13 @@ dependencies {
     implementation("com.squareup.sqldelight:runtime-jvm:1.5.3")
     implementation("com.squareup.sqldelight:sqlite-driver:1.5.3")
 
+    implementation ("com.googlecode.soundlibs:mp3spi:1.9.5-1")
+    implementation ("com.googlecode.soundlibs:tritonus-share:0.3.6-2")
+
+    implementation ("com.googlecode.soundlibs:jlayer:1.0.1.4")
+
+
+
 }
 
 compose.desktop {

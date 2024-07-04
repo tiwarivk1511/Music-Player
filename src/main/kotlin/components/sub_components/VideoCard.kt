@@ -15,11 +15,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
-fun AlbumCards(
-    albumName: String,
-    artistName: String,
-    modifier: Modifier = Modifier,
-    onCardClick: () -> Unit
+fun VideoCards(
+
+    title: String,
+    subtitle: String,
+    description: String,
+    modifier: Modifier,
+    onCardClick: () -> Unit,
+    onAddFavoriteClick: () -> Unit,
 ) {
     Card(
         modifier = modifier
@@ -38,10 +41,10 @@ fun AlbumCards(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Image(
-                painter = painterResource("drawable/ic_album.png"),
+                painter = painterResource("drawable/ic_colored_video.png"),
                 contentDescription = "Album Image",
                 modifier = Modifier
-                    .size(60.dp)
+                    .size(40.dp)
                     .padding(end = 8.dp),
                 alpha = 0.5f
             )
@@ -53,18 +56,12 @@ fun AlbumCards(
                     .padding(horizontal = 2.dp)
             ) {
                 Text(
-                    text = albumName,
+                    text = title,
                     color = Color.White,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = artistName,
-                    color = Color.Gray,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+
             }
 
             Image(
@@ -77,6 +74,15 @@ fun AlbumCards(
                 alpha = 0.5f
             )
 
+            Image(
+                painter = painterResource("drawable/ic_favorite.png"),
+                contentDescription = "Play Icon",
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(8.dp)
+                    .clickable {onAddFavoriteClick},
+                alpha = 0.5f
+            )
         }
     }
 }

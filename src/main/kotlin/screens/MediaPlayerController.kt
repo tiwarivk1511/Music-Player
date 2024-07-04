@@ -1,144 +1,155 @@
 package screens
 
+import javazoom.jl.decoder.Bitstream
+import javazoom.jl.decoder.JavaLayerException
+import javazoom.jl.player.advanced.AdvancedPlayer
+import javazoom.jl.player.advanced.PlaybackEvent
+import javazoom.jl.player.advanced.PlaybackListener
 import java.io.File
-import javax.sound.sampled.*
+import java.io.FileInputStream
 
 class MediaPlayerController {
-    private var audioFiles: List<File> = emptyList()
+    private var mediaFiles: List<File> = emptyList()
     private var currentIndex: Int = -1
-    private val VOLUME_STEP = 0.1f
-    private var clip: Clip? = null
+    private var player: AdvancedPlayer? = null
     private var _isPlaying: Boolean = false
-    private var totalDuration: Float = 0.0f
-    private var isShuffleMode: Boolean = false
-    var currentSongName: String = ""
-
-    var currentArtistName: String = ""
-
-    private var currentPosition: Float = 0.0f
-
+    private var currentSongName: String = ""
+    private var currentArtistName: String = ""
+    private var currentPosition: Int = 0
+    private var totalFrames: Int = 0
 
     fun load(files: List<File>) {
-        audioFiles = files
+        mediaFiles = files
         currentIndex = -1
-        isShuffleMode = false
         initializeMediaPlayer()
     }
 
     private fun initializeMediaPlayer() {
-        if (audioFiles.isNotEmpty()) {
+        if (mediaFiles.isNotEmpty()) {
             currentIndex = 0
-            playSongAtIndex(currentIndex)
+            playMediaAtIndex(currentIndex)
         }
     }
 
-    private fun playSongAtIndex(index: Int) {
-        if (index >= 0 && index < audioFiles.size) {
-            try {
-                val audioInputStream: AudioInputStream = AudioSystem.getAudioInputStream(audioFiles[index])
-                val clip: Clip = AudioSystem.getClip()
-                clip.open(audioInputStream)
-                this.clip = clip
-                this.totalDuration = (clip.microsecondLength.toFloat() / 1_000_000)
-                currentPosition = 0.0f
-                currentSongName = audioFiles[index].nameWithoutExtension
-                currentArtistName = audioFiles[index].parentFile?.name ?: "Unknown Artist"
-                _isPlaying = true
-                clip.start()
-                clip.addLineListener { event ->
-                    if (event.type == LineEvent.Type.STOP) {
-                        playNext()
-                    }
+    private fun playMediaAtIndex(index: Int) {
+        if (index >= 0 && index < mediaFiles.size) {
+            val file = mediaFiles[index]
+            if (file.isFile) {
+                if (file.extension.toLowerCase() == "mp3") {
+                    playAudioFile(file, currentPosition)
+                } else {
+                    // Handle other formats
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
+        }
+    }
+
+    fun playAudioFile(file: File, startFrame: Int = 0) {
+        try {
+            val fis = FileInputStream(file)
+            val bitstream = Bitstream(fis)
+            var frameCount = 0
+            while (bitstream.readFrame() != null) {
+                frameCount++
+                bitstream.closeFrame()
+            }
+            totalFrames = frameCount
+            bitstream.close()
+
+            player = AdvancedPlayer(FileInputStream(file))
+            player?.setPlayBackListener(object : PlaybackListener() {
+                override fun playbackFinished(evt: PlaybackEvent?) {
+                    currentPosition = evt?.frame ?: 0
+                    playNext()
+                }
+            })
+
+            _isPlaying = true
+            currentSongName = file.nameWithoutExtension
+            currentArtistName = file.parentFile?.name ?: "Unknown Artist"
+
+            Thread {
+                try {
+                    player?.play(startFrame, totalFrames)
+                } catch (e: JavaLayerException) {
+                    e.printStackTrace()
+                }
+            }.start()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun play() {
+        if (!_isPlaying) {
+            playMediaAtIndex(currentIndex)
+        }
+    }
+
+    fun pause() {
+        if (_isPlaying) {
+            player?.close()
+            _isPlaying = false
         }
     }
 
     fun togglePlayPause() {
-        if (_isPlaying) pause() else play()
-    }
-
-    fun play() {
-        clip?.start()
-        _isPlaying = true
-    }
-
-    fun pause() {
-        clip?.stop()
-        _isPlaying = false
-    }
-
-    fun stop() {
-        clip?.stop()
-        clip?.flush()
-        clip?.framePosition = 0
-        _isPlaying = false
-    }
-
-    fun toggleShuffle() {
-        isShuffleMode = !isShuffleMode
-    }
-
-    fun playNext() {
-        if (isShuffleMode) {
-            val nextIndex = (0 until audioFiles.size).random()
-            playSongAtIndex(nextIndex)
+        if (_isPlaying) {
+            pause()
         } else {
-            currentIndex = (currentIndex + 1) % audioFiles.size
-            playSongAtIndex(currentIndex)
-        }
-    }
-
-    fun playPrevious() {
-        if (isShuffleMode) {
-            val previousIndex = (0 until audioFiles.size).random()
-            playSongAtIndex(previousIndex)
-        } else {
-            currentIndex = if (currentIndex > 0) currentIndex - 1 else audioFiles.size - 1
-            playSongAtIndex(currentIndex)
-        }
-    }
-
-    fun adjustVolume(isIncrease: Boolean) {
-        val gainControl = clip?.let { line ->
-            if (line is Clip) {
-                line.getControl(FloatControl.Type.MASTER_GAIN) as? FloatControl
-            } else {
-                null
-            }
-        }
-
-        gainControl?.let { control ->
-            val currentVolume = control.value
-            val newValue = if (isIncrease) {
-                Math.min(currentVolume + VOLUME_STEP, control.maximum)
-            } else {
-                Math.max(currentVolume - VOLUME_STEP, control.minimum)
-            }
-            control.value = newValue
+            play()
         }
     }
 
     fun seekTo(position: Float) {
-        val newPosition = (position / 100) * totalDuration
-        clip?.framePosition = (newPosition * clip?.format?.frameRate!!).toInt()
+        stop()
+        currentPosition = position.toInt()
+        playMediaAtIndex(currentIndex)
     }
 
-    fun getCurrentPosition(): Float {
-        return clip?.microsecondPosition?.toFloat()?.div(1_000_000) ?: 0.0f
+    fun getCurrentPosition(): Int {
+        return currentPosition
     }
 
-    fun getTotalDuration(): Float {
-        return totalDuration
+    fun playNext() {
+        currentPosition = 0
+        currentIndex = (currentIndex + 1) % mediaFiles.size
+        playMediaAtIndex(currentIndex)
+    }
+
+    fun playPrevious() {
+        currentPosition = 0
+        currentIndex = if (currentIndex > 0) currentIndex - 1 else mediaFiles.size - 1
+        playMediaAtIndex(currentIndex)
+    }
+
+    fun stop() {
+        player?.close()
+        _isPlaying = false
+    }
+
+    fun adjustVolume(isIncrease: Boolean) {
+        // Volume control is not directly supported by JLayer, would require additional implementation
+    }
+
+    fun getTotalDuration(): Int {
+        // Total duration calculation is not directly supported by JLayer, would require additional implementation
+        return 0
     }
 
     fun isPlaying(): Boolean {
         return _isPlaying
     }
 
-    fun getCurrentFilePath(): String? {
-        return audioFiles.getOrNull(currentIndex)?.absolutePath
+    fun getCurrentSongName(): String {
+        return currentSongName
+    }
+
+    fun getCurrentArtistName(): String {
+        return currentArtistName
+    }
+
+    fun toggleShuffle() {
+        // Shuffle functionality implementation
     }
 }
