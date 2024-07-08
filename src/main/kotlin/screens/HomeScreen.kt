@@ -2,32 +2,25 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import components.sub_components.BannerHome
+import components.sub_components.MarqueeText
 import components.sub_components.SongListViewArea
 import components.sub_components.VideoListViewArea
-import screens.MediaPlayerController
-import screens.retrieveVideoFilesFromFolders
-import screens.scanMediaFiles
-import java.io.File
 
 @Composable
 fun HomeScreen(
     function: () -> Unit,
     folderPaths: List<String>,
     videoFolderPaths: List<String>,
-    mediaPlayerController: MediaPlayerController,
 
 ) {
     val verticalScrollState = rememberScrollState()
-    val videoFiles = remember { retrieveVideoFilesFromFolders(videoFolderPaths) }
-    val audioFiles = remember { scanMediaFiles(folderPaths) }
+
 
     Box(
         modifier = Modifier.fillMaxSize().background(Color.DarkGray)
@@ -38,6 +31,9 @@ fun HomeScreen(
                 .background(Color.DarkGray)
                 .verticalScroll(verticalScrollState)
         ) {
+
+            MarqueeText("Hello, Let's Enjoy the Rock!!, To Use the Video Play you need to install the VLC Media Player")
+
             // Show the banner
             BannerHome(
                 modifier = Modifier
@@ -46,6 +42,8 @@ fun HomeScreen(
                 title = "What's New?",
                 message = "Hello, Let's Enjoy the Rock!!"
             )
+
+            Spacer(modifier = Modifier.height(10.dp))
 
             Row(
                 modifier = Modifier
@@ -80,7 +78,7 @@ fun HomeScreen(
                         .fillMaxHeight()
                         .background(Color.DarkGray)
                         .padding(4.dp),
-                    mediaPlayerController = mediaPlayerController,
+                    mediaPlayerController = MediaPlayerController,
 
                 )
             }

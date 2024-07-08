@@ -1,11 +1,11 @@
 package screens
 
+import MediaPlayerController
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -13,14 +13,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import components.BottomControl
+import components.sub_components.FullScreenVideoPlayer
 import components.sub_components.VideoCards
 import java.io.File
 
 @Composable
 fun VideoScreen(onNavigate: () -> Unit, folderPaths: List<String>) {
     val videoFiles = remember { retrieveVideoFilesFromFolders(folderPaths) }
-    val mediaPlayer = remember { MediaPlayerController() }
     val verticalScrollState = rememberScrollState()
+    var selectedVideoPath by remember { mutableStateOf<String?>(null) }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.DarkGray)) {
 
@@ -47,57 +48,37 @@ fun VideoScreen(onNavigate: () -> Unit, folderPaths: List<String>) {
                     modifier = Modifier.padding(start = 8.dp, end = 16.dp)
                 )
             }
-
-            // Scrollable content area
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(verticalScrollState)
-                    .padding(horizontal = 16.dp)
-            ) {
-                // Display video files
-                videoFiles.forEach { videoFile ->
-                    VideoCards(
-                        title = videoFile.nameWithoutExtension,
-                        subtitle = videoFile.parentFile?.name ?: "Unknown Artist",
-                        description = videoFile.name,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(65.dp),
-                        onCardClick = {
-                            // Handle video playback navigation here
-                        },
-
-                        onAddFavoriteClick = {
-                            // Add video file to favorite list
-                           Settings.favoriteVideos.add(videoFile.absolutePath)
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-            }
         }
 
-        // Fixed bottom control bar
-        BottomControl(
-            songName = mediaPlayer.getCurrentSongName(),
-            artistName = mediaPlayer.getCurrentArtistName(),
-            isPlaying = mediaPlayer.isPlaying(),
-            onPlayPauseToggle = { mediaPlayer.togglePlayPause() },
-            onNext = { mediaPlayer.playNext() },
-            onPrevious = { mediaPlayer.playPrevious() },
-            onVolumeUp = { mediaPlayer.adjustVolume(true) },
-            onVolumeDown = { mediaPlayer.adjustVolume(false) },
-            onShuffleToggle = { mediaPlayer.toggleShuffle() },
-            currentPosition = mediaPlayer.getCurrentPosition(),
-            totalDuration = mediaPlayer.getTotalDuration(),
-            onSeek = { position -> mediaPlayer.seekTo(position) },
+
+        // Scrollable content area
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(82.dp)
-                .background(color = Color(0xFF1E1E1E))
-                .align(Alignment.BottomCenter)
-        )
+                .verticalScroll(verticalScrollState)
+                .padding(horizontal = 16.dp)
+                .padding(top = 80.dp) // Add padding to avoid overlapping with header
+        ) {
+            // Display video files
+            videoFiles.forEach { videoFile ->
+                VideoCards(
+                    title = videoFile.nameWithoutExtension,
+                    subtitle = videoFile.parentFile?.name ?: "Unknown Artist",
+                    description = videoFile.name,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(65.dp),
+                    onCardClick = {
+                        selectedVideoPath = videoFile.path
+                    },
+                    onAddFavoriteClick = {
+                        // Add video file to favorite list
+                        Settings.favoriteVideos.add(videoFile.absolutePath)
+                    }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
 
         // Vertical scrollbar
         VerticalScrollbar(
@@ -106,6 +87,16 @@ fun VideoScreen(onNavigate: () -> Unit, folderPaths: List<String>) {
                 .width(8.dp)
                 .align(Alignment.CenterEnd),
             adapter = rememberScrollbarAdapter(verticalScrollState)
+        )
+    }
+
+    selectedVideoPath?.let { videoPath ->
+        FullScreenVideoPlayer(
+            videoPath = videoPath,
+            onClose = {
+                selectedVideoPath = null
+                onNavigate()
+            }
         )
     }
 }

@@ -1,9 +1,10 @@
 package components.sub_components
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
-import androidx.compose.runtime.Composable
+import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -11,12 +12,16 @@ import java.io.File
 
 @Composable
 fun VideoListViewArea(modifier: Modifier, videoFolderPaths: List<String>) {
+    var selectedVideoPath by remember { mutableStateOf<String?>(null) }
+
     Card(
         modifier = modifier
     ) {
-        Column(modifier = Modifier.fillMaxSize()
-            .background(color = Color(0xFF1E1E1E))) {
-
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color(0xFF1E1E1E))
+        ) {
             // Iterate through each video folder path
             for (folderPath in videoFolderPaths) {
                 val folder = File(folderPath)
@@ -34,11 +39,18 @@ fun VideoListViewArea(modifier: Modifier, videoFolderPaths: List<String>) {
                             .fillMaxWidth()
                             .height(60.dp)
                             .padding(bottom = if (index == ((folder.listFiles()?.size ?: 0) - 1)) 0.dp else 2.dp),
-                        onCardClick = { /* Handle card click */ },
+                        onCardClick = { selectedVideoPath = file.absolutePath },
                         onAddFavoriteClick = { /* Handle favorite click */ }
                     )
                 }
             }
+        }
+
+        selectedVideoPath?.let { videoPath ->
+            FullScreenVideoPlayer(
+                videoPath = videoPath,
+                onClose = { selectedVideoPath = null }
+            )
         }
     }
 }

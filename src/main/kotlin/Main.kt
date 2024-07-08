@@ -40,14 +40,19 @@ fun App() {
                 Column(modifier = Modifier.verticalScroll(verticalScrollState)) {  }
                 //Show the current Screen here
                 when (currentScreen) {
-                    "home" -> HomeScreen ({ currentScreen = "audio" }, Settings.audioFolders, videoFolderPaths = Settings.videoFolders, mediaPlayerController = MediaPlayerController())
+                    "home" -> HomeScreen ({ currentScreen = "audio" },
+                        Settings.audioFolders,
+                        videoFolderPaths = Settings.videoFolders
+                    )
+
                     "audio" -> {
                         AudioScreen(
-                            { currentScreen = "videos" } ,Settings.audioFolders
+                            { currentScreen = "videos" }, Settings.audioFolders
                         )
                     }
-                    "videos" -> VideoScreen({ currentScreen = "favorites" }, Settings.videoFolders
-                    )
+
+                    "videos" -> VideoScreen({ currentScreen = "favorites" }, Settings.videoFolders)
+
                     "favorites" -> FavoritesScreen { currentScreen = "home" }
                     "settings" -> SettingsScreen( { currentScreen = "home"},onAudioFoldersSelected = { folders ->
                         Settings.audioFolders = folders
@@ -57,26 +62,7 @@ fun App() {
                         })
                 }
             }
-            // Bottom bar for music control (static)
-            BottomControl(
-                songName = "Numb",
-                artistName = "Linkin Park",
-                isPlaying = true,
-                onPlayPauseToggle = {},
-                onNext = {},
-                onPrevious = {},
-                onVolumeUp = {},
-                onVolumeDown = {},
-                onShuffleToggle = {},
-                currentPosition = 0,
-                totalDuration = 100,
-                onSeek = {},
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(82.dp)
-                    .background(color = Color(0xFF1E1E1E))
-                    .align(Alignment.BottomCenter)
-            )
+
 
             VerticalScrollbar(
                 modifier = Modifier
@@ -93,12 +79,21 @@ fun App() {
 
 
 
+
 fun main() = application {
     Window(onCloseRequest = ::exitApplication,
         title = "Music Player",
         icon = painterResource("drawable/ic_album.png")
     ) {
         App()
+
+        downloadVLC()
     }
+}
+
+fun downloadVLC() {
+    //auto-download vlc media playe
+    java.awt.Desktop.getDesktop().browse(java.net.URI("https://get.videolan.org/vlc/3.0.21/"))
+
 }
 

@@ -18,16 +18,15 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FavoriteCard(
     name: String,
-    filepath: String,
     modifier: Modifier,
     isAudio: Boolean,
     onCardClick: () -> Unit,
     onRemoveClick: () -> Unit
 ) {
     if (isAudio) {
-        FavoriteAudioCards(name, filepath, modifier, onCardClick, onRemoveClick)
+        FavoriteAudioCards(name,  modifier, onCardClick, onRemoveClick)
     } else {
-        FavoriteVideoCards(name, filepath,modifier, onCardClick, onRemoveClick)
+        FavoriteVideoCards(name,modifier, onCardClick, onRemoveClick)
     }
 }
 
@@ -36,7 +35,6 @@ fun FavoriteCard(
 @Composable
 fun FavoriteVideoCards(
     videoName: String,
-    filepath: String,
     modifier: Modifier = Modifier,
     onCardClick: () -> Unit,
     onRemoveClick: () -> Unit
@@ -109,7 +107,6 @@ fun FavoriteVideoCards(
 @Composable
 fun FavoriteAudioCards(
     audioName: String,
-    filepath: String,
     modifier: Modifier = Modifier,
     onCardClick: () -> Unit,
     onRemoveClick: () -> Unit

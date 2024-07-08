@@ -1,16 +1,14 @@
 package screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -58,28 +56,41 @@ fun SettingsScreen(
                 .background(Color.DarkGray)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            Text(
-                text = "Settings",
-                color = Color.White,
-                fontWeight = FontWeight.SemiBold,
-                style = MaterialTheme.typography.h5,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
 
-            DropdownSettingItem(
-                option = SettingOption(
-                    title = "Audio Quality",
-                    description = "Select audio quality",
-                    type = SettingType.DROPDOWN,
-                    icon = painterResource("drawable/volume_up.png")
-                ),
-                selectedItem = selectedAudioQuality,
-                onItemSelected = { newQuality ->
-                    selectedAudioQuality = newQuality
-                    // Handle the selected quality as needed
-                },
-                items = listOf("Low", "Medium", "High")
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource("drawable/ic_settings.png"),
+                    contentDescription = "Album Image",
+                    modifier = Modifier.size(40.dp).align(Alignment.CenterVertically),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = "Settings",
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.h5,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+            }
+
+//            DropdownSettingItem(
+//                option = SettingOption(
+//                    title = "Audio Quality",
+//                    description = "Select audio quality",
+//                    type = SettingType.DROPDOWN,
+//                    icon = painterResource("drawable/volume_up.png")
+//                ),
+//                selectedItem = selectedAudioQuality,
+//                onItemSelected = { newQuality ->
+//                    selectedAudioQuality = newQuality
+//                    // Handle the selected quality as needed
+//                },
+//                items = listOf("Low", "Medium", "High")
+//            )
 
             SliderSettingItem(
                 option = SettingOption(

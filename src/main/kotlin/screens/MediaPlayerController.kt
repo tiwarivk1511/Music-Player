@@ -1,5 +1,3 @@
-package screens
-
 import javazoom.jl.decoder.Bitstream
 import javazoom.jl.decoder.JavaLayerException
 import javazoom.jl.player.advanced.AdvancedPlayer
@@ -8,7 +6,7 @@ import javazoom.jl.player.advanced.PlaybackListener
 import java.io.File
 import java.io.FileInputStream
 
-class MediaPlayerController {
+object MediaPlayerController {
     private var mediaFiles: List<File> = emptyList()
     private var currentIndex: Int = -1
     private var player: AdvancedPlayer? = null
@@ -18,8 +16,8 @@ class MediaPlayerController {
     private var currentPosition: Int = 0
     private var totalFrames: Int = 0
 
-    fun load(files: List<File>) {
-        mediaFiles = files
+    fun load(files: String) {
+        mediaFiles = List<File>(files.split(";").size) { File(files.split(";")[it]) }
         currentIndex = -1
         initializeMediaPlayer()
     }
@@ -151,5 +149,13 @@ class MediaPlayerController {
 
     fun toggleShuffle() {
         // Shuffle functionality implementation
+    }
+
+    fun playAudioFile(filePath: String) {
+        // Play audio file implementation
+        val file = File(filePath)
+        if (file.exists() && file.isFile) {
+            playAudioFile(file)
+        }
     }
 }

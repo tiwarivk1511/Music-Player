@@ -1,5 +1,6 @@
 package screens
 
+import MediaPlayerController
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
@@ -8,6 +9,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import components.sub_components.ListCards
 import components.sub_components.addToFavorites
@@ -18,17 +22,26 @@ import javax.swing.JOptionPane
 @Composable
 fun AudioScreen(
     onNavigate: () -> Unit,
-    folderPaths: List<String>,
+    folderPaths: List<String>
 ) {
     val verticalScrollState = rememberScrollState()
-    val mediaFiles = remember { scanMediaFiles(folderPaths) }
 
     // MediaPlayer state
-    val mediaPlayer = remember { MediaPlayerController() }
     var isPlaying by remember { mutableStateOf(false) }
 
     // Favorite state
-    val favoriteMedia = remember { mutableStateListOf<String>().apply { addAll(loadFavoriteMedia()) } }
+    val favoriteAudioList by remember { derivedStateOf { loadFavoriteMedia() } }
+
+    // Function to handle unsupported file format error
+    fun handleUnsupportedFormat(file: File) {
+        showErrorDialog("Unsupported file format: ${file.extension}")
+    }
+
+    // Function to play audio file
+    fun playAudio(file: File) {
+        MediaPlayerController.playAudioFile(file)
+        isPlaying = true
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.DarkGray)) {
         // Fixed header
@@ -38,12 +51,27 @@ fun AudioScreen(
                 .padding(horizontal = 16.dp, vertical = 16.dp)
                 .background(Color.DarkGray)
         ) {
-            Text(
-                text = "Audio",
-                style = MaterialTheme.typography.h5,
-                color = Color.White,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource("drawable/ic_favorites.png"),
+                    contentDescription = "Album Image",
+                    modifier = Modifier.size(40.dp).align(Alignment.CenterVertically),
+                    contentScale = ContentScale.Crop
+                )
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Text(
+                    text = "Audio",
+                    style = MaterialTheme.typography.h5,
+                    color = Color.White,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+
+            }
 
             // Scrollable content area
             Column(
@@ -54,33 +82,38 @@ fun AudioScreen(
                     .background(Color.DarkGray)
             ) {
                 // Display media files
+                val mediaFiles = remember(folderPaths) { scanMediaFiles(folderPaths) }
                 mediaFiles.forEach { file ->
+                    val isFavorite = favoriteAudioList.contains(file.path)
                     ListCards(
-                        file.nameWithoutExtension,
-                        Modifier
+                        soundName = file.nameWithoutExtension,
+                        modifier = Modifier
                             .fillMaxWidth()
-                            .height(65.dp),
+                            .height(70.dp),
                         onCardClick = {
-                            if (file.extension.toLowerCase() == "mp3") {
-                                mediaPlayer.playAudioFile(file)
-                                isPlaying = mediaPlayer.isPlaying()
-                            } else {
-                                // Handle video playback or unsupported formats
-                                // Example: mediaPlayer.playVideoFile(file)
-                                // For now, display error message
-                                showErrorDialog("Unsupported file format: ${file.extension}")
+                            when (file.extension.toLowerCase()) {
+                                "mp3", "wav" -> playAudio(file)
+                                else -> handleUnsupportedFormat(file)
                             }
                         },
                         onFavoriteClick = {
                             addToFavorites(file)
-                        }
+                            // Update the favorite list after adding or removing from favorites
+                            saveFavoriteMedia(loadFavoriteMedia())
+                        },
+                        onPauseClick = {
+                            MediaPlayerController.pause()
+                            isPlaying = false
+                        },
+                        isPlaying = isPlaying,
+                        favoriteList = favoriteAudioList
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
 
-        // Vertical scrollbar (optional)
+        // Vertical scrollbar
         VerticalScrollbar(
             modifier = Modifier
                 .fillMaxHeight()

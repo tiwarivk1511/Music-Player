@@ -19,10 +19,7 @@ fun BottomControl(
     onPlayPauseToggle: () -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
-    onVolumeUp: () -> Unit, // Callback for volume up action
-    onVolumeDown: () -> Unit, // Callback for volume down action
     onShuffleToggle: () -> Unit, // Callback for shuffle toggle action
-    currentPosition: Int, // Current position of the song in seconds
     totalDuration: Int, // Total duration of the song in seconds
     onSeek: (Float) -> Unit, // Callback for seek action
     modifier: Modifier = Modifier
@@ -117,26 +114,6 @@ fun BottomControl(
                     )
                 }
 
-
-
-
-            // Volume Control (Adjust volume)
-            IconButton(onClick = { onVolumeDown() }) {
-                Icon(
-                    painter = painterResource("drawable/volume_down.png"),
-                    contentDescription = "Volume Down",
-                    modifier = Modifier.size(24.dp), // Set icon size
-                    tint = Color.White // Set icon color to white
-                )
-            }
-            IconButton(onClick = { onVolumeUp() }) {
-                Icon(
-                    painter = painterResource("drawable/volume_up.png"),
-                    contentDescription = "Volume Up",
-                    modifier = Modifier.size(24.dp), // Set icon size
-                    tint = Color.White // Set icon color to white
-                )
-            }
 
             // Shuffle Toggle Button
             IconButton(onClick = { onShuffleToggle() }) {
