@@ -14,6 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import components.sub_components.FavoriteCard
+import components.sub_components.FullScreenVideoPlayer
+import components.sub_components.VideoListCards
 import kotlinx.coroutines.delay
 import java.io.File
 import java.util.prefs.Preferences
@@ -46,7 +48,6 @@ fun FavoritesScreen(onNavigate: () -> Unit) {
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.h5,
                 )
-
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -109,10 +110,10 @@ fun FavoriteAudioViewArea(modifier: Modifier) {
         favoriteAudioList.forEach { audioPath ->
             FavoriteCard(
                 name = File(audioPath).nameWithoutExtension,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().height(80.dp),
                 isAudio = true,
                 onCardClick = {
-                    MediaPlayerController.playAudioFile(audioPath)
+                    MediaPlayerController.playAudioFile(File(audioPath))
                 },
                 onRemoveClick = {
                     Settings.favoriteAudio.remove(audioPath)
@@ -140,16 +141,26 @@ fun FavoriteVideoViewArea(modifier: Modifier) {
 
     Column(modifier = modifier.fillMaxHeight()) {
         favoriteVideosList.forEach { videoPath ->
-            FavoriteCard(
-                name = File(videoPath).nameWithoutExtension,
-                modifier = Modifier.fillMaxWidth(),
-                isAudio = false,
-                onCardClick = { /* Play video */ },
-                onRemoveClick = {
-                    Settings.favoriteVideos.remove(videoPath)
+            VideoListCards(
+                videoName = File(videoPath).nameWithoutExtension,
+                modifier = Modifier.fillMaxWidth().height(80.dp),
+                onCardClick = {
+                    // Handle video play click
+                },
+                onFavoriteClick = {
+                    // Handle favorite toggle click
+                    if (Settings.favoriteVideos.contains(videoPath)) {
+                        Settings.favoriteVideos.remove(videoPath)
+                    } else {
+                        Settings.favoriteVideos.add(videoPath)
+                    }
                     saveFavoriteVideos(Settings.favoriteVideos)
-                    removeFavoriteVideoFromPreferences(videoPath)
-                }
+                },
+                favoriteList = Settings.favoriteVideos,
+                onPauseClick = {
+                    // Handle pause click
+                },
+                isPlaying = false // Update this based on actual state
             )
         }
     }

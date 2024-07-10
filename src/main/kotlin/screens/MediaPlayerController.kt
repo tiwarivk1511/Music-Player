@@ -158,4 +158,28 @@ object MediaPlayerController {
             playAudioFile(file)
         }
     }
+
+    fun playVideoFile(filePath: String){
+        // Play video file implementation
+        val file = File(filePath)
+        if (file.exists() && file.isFile) {
+            playVideo(file)
+        }
+    }
+
+    private fun playVideo(file: File) {
+        try {
+            val fis = FileInputStream(file)
+            val bitstream = Bitstream(fis)
+            while (bitstream.readFrame() != null) {
+                bitstream.closeFrame()
+            }
+            bitstream.close()
+            player = AdvancedPlayer(FileInputStream(file))
+            player?.play()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+    }
 }

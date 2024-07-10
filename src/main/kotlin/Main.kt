@@ -22,6 +22,8 @@ object Settings {
     var videoFolders = loadVideoFolderPaths()
 }
 
+
+
 @Composable
 @Preview
 fun App() {
@@ -53,7 +55,7 @@ fun App() {
 
                     "videos" -> VideoScreen({ currentScreen = "favorites" }, Settings.videoFolders)
 
-                    "favorites" -> FavoritesScreen { currentScreen = "home" }
+                    "favorites" -> FavoritesScreen{ currentScreen = "home" }
                     "settings" -> SettingsScreen( { currentScreen = "home"},onAudioFoldersSelected = { folders ->
                         Settings.audioFolders = folders
                     },

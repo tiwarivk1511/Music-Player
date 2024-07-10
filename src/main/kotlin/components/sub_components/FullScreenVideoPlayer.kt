@@ -76,7 +76,7 @@ fun FullScreenVideoPlayer(videoPath: String, onClose: () -> Unit) {
                                     modifier = Modifier.align(Alignment.CenterStart)
                                 ) {
                                     Icon(
-                                        painter = painterResource("drawable/ic_pause.png"),
+                                        painter = painterResource("drawable/pause_button.png"),
                                         contentDescription = "Pause",
                                         tint = Color.White
                                     )
@@ -87,7 +87,7 @@ fun FullScreenVideoPlayer(videoPath: String, onClose: () -> Unit) {
                                     modifier = Modifier.align(Alignment.Center)
                                 ) {
                                     Icon(
-                                        painter = painterResource("drawable/ic_play.png"),
+                                        painter = painterResource("drawable/play_button.png"),
                                         contentDescription = "Play",
                                         tint = Color.White
                                     )
@@ -122,7 +122,7 @@ fun FullScreenVideoPlayer(videoPath: String, onClose: () -> Unit) {
             }
 
             // Start playback
-           // mediaPlayer.play()
+            mediaPlayer.controls().play()
 
             // Add media player component to JFrame
             frame.contentPane.add(mediaPlayerComponent)

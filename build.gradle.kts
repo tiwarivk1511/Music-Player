@@ -35,9 +35,9 @@ dependencies {
     // Video
     implementation("uk.co.caprica:vlcj:4.7.0")
 
-    // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("org.jetbrains.compose.desktop:desktop-jvm:1.0.0")
+    implementation("org.openjfx:javafx-controls:17.0.2")
+    implementation("org.openjfx:javafx-media:17.0.2")
 }
 
 compose.desktop {

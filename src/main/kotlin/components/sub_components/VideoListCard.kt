@@ -6,34 +6,33 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 
 @Composable
-fun VideoCards(
-    title: String,
-    subtitle: String,
-    description: String,
-    modifier: Modifier,
+fun VideoListCards(
+    videoName: String,
+    modifier: Modifier = Modifier,
     onCardClick: () -> Unit,
-    onAddFavoriteClick: () -> Unit,
+    onFavoriteClick: () -> Unit,
+    favoriteList: List<String>,  // Assuming favoriteList contains names of favorite items
+    onPauseClick: () -> Unit,
+    isPlaying: Boolean
 ) {
-    // State to track if video is playing
-    val (isPlaying, setPlaying) = remember { mutableStateOf(false) }
-    // State to track if video is in favorites
-    val (isFavorite, setFavorite) = remember { mutableStateOf(false) }
+    // Determine if the current video is a favorite on initial load
+    var currentIsPlaying by remember { mutableStateOf(isPlaying) }
+    var isFavorite by remember { mutableStateOf(favoriteList.contains(videoName)) }
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(2.dp),
+            .padding(2.dp)
+            .height(150.dp),
         shape = RoundedCornerShape(10.dp),
         backgroundColor = Color(0xFF676565),
         elevation = 4.dp
@@ -41,15 +40,15 @@ fun VideoCards(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(2.dp),
+                .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Image(
-                painter = painterResource("drawable/ic_colored_video.png"),
-                contentDescription = "Album Image",
+                painter = painterResource("drawable/ic_colored_video.png"),  // Replace with appropriate video thumbnail if available
+                contentDescription = "Video Thumbnail",
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(60.dp)
                     .padding(end = 8.dp),
                 alpha = 0.5f
             )
@@ -58,47 +57,45 @@ fun VideoCards(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .padding(horizontal = 2.dp)
+                    .padding(horizontal = 8.dp)
             ) {
                 Text(
-                    text = title,
+                    text = videoName,
                     color = Color.White,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-
-                Text(
-                    text = subtitle,
-                    color = Color.White,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Spacer(modifier = Modifier.height(4.dp))
             }
 
-            // Toggle play icon based on play state
+            // Play/Pause Icon
             Image(
-                painter = painterResource(if (isPlaying) "drawable/pause_button.png" else "drawable/play_button.png"),
-                contentDescription = "Play Icon",
+                painter = painterResource(if (currentIsPlaying) "drawable/pause_button.png" else "drawable/play_button.png"),
+                contentDescription = if (currentIsPlaying) "Pause Icon" else "Play Icon",
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(30.dp)
                     .padding(8.dp)
                     .clickable {
-                        setPlaying(!isPlaying)
-                        onCardClick()
+                        if (currentIsPlaying) {
+                            onPauseClick()
+                        } else {
+                            onCardClick()
+                        }
+                        currentIsPlaying = !currentIsPlaying  // Toggle currentIsPlaying state
                     },
                 alpha = 0.5f
             )
 
-            // Toggle favorite icon based on favorite state
+            // Favorite Icon
             Image(
                 painter = painterResource(if (isFavorite) "drawable/ic_favorites_filled.png" else "drawable/ic_favorites.png"),
-                contentDescription = "Favorite Icon",
+                contentDescription = if (isFavorite) "Remove from Favorites Icon" else "Add to Favorites Icon",
                 modifier = Modifier
                     .size(40.dp)
                     .padding(8.dp)
                     .clickable {
-                        setFavorite(!isFavorite)
-                        onAddFavoriteClick()
+                        isFavorite = !isFavorite  // Toggle isFavorite state
+                        onFavoriteClick()
                     },
                 alpha = 0.5f
             )

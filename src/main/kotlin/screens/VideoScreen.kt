@@ -11,72 +11,106 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import components.BottomControl
-import components.sub_components.FullScreenVideoPlayer
-import components.sub_components.VideoCards
+import components.sub_components.ListCards
+import components.sub_components.VideoListCards
+import components.sub_components.addToFavorites
 import java.io.File
+import java.util.prefs.Preferences
+import javax.swing.JOptionPane
 
 @Composable
-fun VideoScreen(onNavigate: () -> Unit, folderPaths: List<String>) {
-    val videoFiles = remember { retrieveVideoFilesFromFolders(folderPaths) }
+fun VideoScreen(
+    onNavigate: () -> Unit,
+    folderPaths: List<String>
+) {
     val verticalScrollState = rememberScrollState()
-    var selectedVideoPath by remember { mutableStateOf<String?>(null) }
+
+    // MediaPlayer state
+    var isPlaying by remember { mutableStateOf(false) }
+
+    // Favorite state
+    val favoriteVideoList by remember { derivedStateOf { loadFavoriteMedia() } }
+
+    // Function to handle unsupported file format error
+    fun handleUnsupportedFormat(file: File) {
+        showErrorDialog("Unsupported file format: ${file.extension}")
+    }
+
+    // Function to play video file
+    fun playVideo(file: File) {
+        MediaPlayerController.playVideoFile(file.toString())
+        isPlaying = true
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.DarkGray)) {
-
         // Fixed header
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp)
+                .padding(horizontal = 16.dp, vertical = 16.dp)
                 .background(Color.DarkGray)
         ) {
+
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    painter = painterResource("drawable/ic_video_play.png"),
+                    painter = painterResource("drawable/ic_favorites.png"),
                     contentDescription = "Album Image",
                     modifier = Modifier.size(40.dp).align(Alignment.CenterVertically),
                     contentScale = ContentScale.Crop
                 )
+
+                Spacer(modifier = Modifier.width(10.dp))
+
                 Text(
-                    text = "Videos",
+                    text = "Video",
                     style = MaterialTheme.typography.h5,
                     color = Color.White,
-                    modifier = Modifier.padding(start = 8.dp, end = 16.dp)
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
+
             }
-        }
 
-
-        // Scrollable content area
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(verticalScrollState)
-                .padding(horizontal = 16.dp)
-                .padding(top = 80.dp) // Add padding to avoid overlapping with header
-        ) {
-            // Display video files
-            videoFiles.forEach { videoFile ->
-                VideoCards(
-                    title = videoFile.nameWithoutExtension,
-                    subtitle = videoFile.parentFile?.name ?: "Unknown Artist",
-                    description = videoFile.name,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(65.dp),
-                    onCardClick = {
-                        selectedVideoPath = videoFile.path
-                    },
-                    onAddFavoriteClick = {
-                        // Add video file to favorite list
-                        Settings.favoriteVideos.add(videoFile.absolutePath)
-                    }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+            // Scrollable content area
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(verticalScrollState)
+                    .padding(horizontal = 16.dp)
+                    .background(Color.DarkGray)
+            ) {
+                // Display media files
+                val mediaFiles = remember(folderPaths) { scanMediaFiles(folderPaths) }
+                mediaFiles.forEach { file ->
+                    val isFavorite = favoriteVideoList.contains(file.path)
+                    VideoListCards(
+                        videoName = file.nameWithoutExtension,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(70.dp),
+                        onCardClick = {
+                            when (file.extension.toLowerCase()) {
+                                "mp4", "avi", "mkv" -> playVideo(file)
+                                else -> handleUnsupportedFormat(file)
+                            }
+                        },
+                        onFavoriteClick = {
+                            addToFavorites(file)
+                            // Update the favorite list after adding or removing from favorites
+                            saveFavoriteMedia(loadFavoriteMedia())
+                        },
+                        onPauseClick = {
+                            MediaPlayerController.pause()
+                            isPlaying = false
+                        },
+                        isPlaying = isPlaying,
+                        favoriteList = favoriteVideoList
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
         }
 
@@ -89,32 +123,7 @@ fun VideoScreen(onNavigate: () -> Unit, folderPaths: List<String>) {
             adapter = rememberScrollbarAdapter(verticalScrollState)
         )
     }
-
-    selectedVideoPath?.let { videoPath ->
-        FullScreenVideoPlayer(
-            videoPath = videoPath,
-            onClose = {
-                selectedVideoPath = null
-                onNavigate()
-            }
-        )
-    }
 }
 
-fun retrieveVideoFilesFromFolders(folderPaths: List<String>): List<File> {
-    val videoFiles = mutableListOf<File>()
 
-    for (folderPath in folderPaths) {
-        val folder = File(folderPath)
-        if (folder.exists() && folder.isDirectory) {
-            val files = folder.listFiles { file ->
-                file.isFile && file.extension.lowercase() in listOf("mp4", "avi", "mkv", "mov") // Add more extensions as needed
-            }
-            if (files != null) {
-                videoFiles.addAll(files)
-            }
-        }
-    }
 
-    return videoFiles
-}
